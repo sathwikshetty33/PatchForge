@@ -1,0 +1,11 @@
+# Python-generated files
+insights/__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+insights/.venv
+core/go.sum
