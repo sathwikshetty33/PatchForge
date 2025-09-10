@@ -5,7 +5,7 @@ build/
 dist/
 wheels/
 *.egg-info
-
+core/.env
 # Virtual environments
 insights/.venv
 core/go.sum
