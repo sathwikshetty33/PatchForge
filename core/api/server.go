@@ -9,13 +9,12 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/sathwikshetty33/PatchForge/tokens"
 	"github.com/sathwikshetty33/PatchForge/db"
-	"gorm.io/gorm"
 )
 
 type Server struct {
 	jwt *tokens.JwtCred
 	Router *gin.Engine
-	db *gorm.DB
+	db *db.DB
 }
 
 func NewServer() *Server {
@@ -23,12 +22,15 @@ func NewServer() *Server {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	router:= gin.Default()
 	secretKey := os.Getenv("SECRET_KEY")
 	jwt := tokens.NewJWT(secretKey)
 	db := db.NewConnetion(os.Getenv("DATABASE_URL"))
-	return &Server{jwt: jwt,
+	server :=Server{jwt: jwt,
 	db:db,
-	Router: router,
 }
+	router:= gin.Default()
+	router.POST("/register", server.userRegistration)
+	server.Router = router
+	
+	return &server
 }

@@ -6,7 +6,11 @@ import (
 	"log"
 )
 
-func NewConnetion(url string) *gorm.DB {
+type DB struct {
+	*gorm.DB
+}
+
+func NewConnetion(url string) *DB {
 	db,err := gorm.Open(postgres.Open(url), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to connect to database: ", err)
@@ -15,5 +19,5 @@ func NewConnetion(url string) *gorm.DB {
 	if err != nil {
 		log.Fatal("Failed to run migrations:", err)
 	}
-	return db
+	return &DB{db}
 }
