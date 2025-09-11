@@ -17,7 +17,7 @@ type Profile struct{
 	UserID      uint      `gorm:"uniqueIndex;not null"` // Unique + FK → Enforces strict 1:1
 	User        User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"` // Relation
 	GithubUrl string `gorm:"not null"`
-	accessToken string `gorm:"not null"`
+	AccessToken string `gorm:"not null"`
 }
 
 type Repository struct {

@@ -42,3 +42,11 @@ func (db *DB) GetUserByUsername(username string) (User, error) {
 	}
 	return user, nil
 }
+
+func (db *DB) GetUserById(id uint) (User, error) {
+	var user User
+	if err := db.Where("id = ?", id).First(&user).Error; err != nil {
+		return User{}, err
+	}
+	return user, nil
+}
