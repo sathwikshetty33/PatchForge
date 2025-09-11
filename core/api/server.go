@@ -36,9 +36,12 @@ func NewServer() *Server {
 	router.POST("/register", server.userRegistration)
 	router.POST("/login", server.userLogin)
 	authRoutes := router.Group("/").Use(authMiddleware(*server.jwt))
-	authRoutes.PUT("/update-profile", server.updateProfile)
-	authRoutes.GET("/get-profile", server.getUserProfile)
-	authRoutes.PUT("/update-user", server.updateUser)
+	authRoutes.PUT("/profile", server.updateProfile)
+	authRoutes.GET("/profile", server.getUserProfile)
+	authRoutes.PUT("/user", server.updateUser)
+	authRoutes.POST("/repositories", server.addRepository)
+	authRoutes.GET("/repositories", server.getRepsitories)
+	authRoutes.PUT("/repositories", server.updateRepository)
 	server.Router = router
 	
 	return &server

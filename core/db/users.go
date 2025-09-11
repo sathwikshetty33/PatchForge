@@ -31,6 +31,10 @@ func (db *DB) CreateUser(username string, email string, password string,) (User,
 	Profile := Profile{
 		UserID: user.ID,
 		User: user,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		GithubUrl: "",
+		AccessToken: "",
 	}
 	db.Create(&Profile)
 	return user, nil

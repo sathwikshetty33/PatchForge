@@ -1,5 +1,7 @@
 package db
 
+import "time"
+
 
 func (db *DB) GetProfileByUserId(id uint) (Profile, error) {
 	var prof Profile
@@ -10,6 +12,7 @@ func (db *DB) GetProfileByUserId(id uint) (Profile, error) {
 }
 
 func (db *DB) UpdateProfile(profile *Profile) error {
+	profile.UpdatedAt = time.Now()
 	if err := db.Save(profile).Error; err != nil {
 		return err
 	}

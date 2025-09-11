@@ -11,10 +11,11 @@ type DB struct {
 }
 
 func NewConnetion(url string) *DB {
-	db,err := gorm.Open(postgres.Open(url), &gorm.Config{})
+	db,err := gorm.Open(postgres.Open(url), &gorm.Config{PrepareStmt: false,})
 	if err != nil {
 		log.Fatal("Failed to connect to database: ", err)
 	}
+	// db.Exec("DEALLOCATE ALL")
 	// err = db.AutoMigrate(&User{}, &Profile{},&Repository{})
 	// if err != nil {
 	// 	log.Fatal("Failed to run migrations:", err)
