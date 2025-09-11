@@ -35,7 +35,14 @@ func NewServer() *Server {
 	router:= gin.Default()
 	router.POST("/register", server.userRegistration)
 	router.POST("/login", server.userLogin)
+	// authRoutes := router.Group("/").Use(authMiddleware(*server.jwt))
+	// authRoutes.GET("/me", server.userMe)
 	server.Router = router
 	
 	return &server
+}
+
+
+func errorResponse(err error) gin.H {
+	return gin.H{"error": err.Error()}
 }

@@ -28,6 +28,11 @@ func (db *DB) CreateUser(username string, email string, password string,) (User,
 	user.UpdatedAt = time.Now()
 
 	db.Create(&user)
+	Profile := Profile{
+		UserID: user.ID,
+		User: user,
+	}
+	db.Create(&Profile)
 	return user, nil
 }
 func (db *DB) GetUserByUsername(username string) (User, error) {
