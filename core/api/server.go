@@ -34,6 +34,7 @@ func NewServer() *Server {
 }
 	router:= gin.Default()
 	router.POST("/register", server.userRegistration)
+	router.POST("/login", server.userLogin)
 	server.Router = router
 	
 	return &server

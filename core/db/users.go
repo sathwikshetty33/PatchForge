@@ -30,3 +30,10 @@ func (db *DB) CreateUser(username string, email string, password string,) (User,
 	db.Create(&user)
 	return user, nil
 }
+func (db *DB) GetUserByUsername(username string) (User, error) {
+	var user User
+	if err := db.Where("username = ?", username).First(&user).Error; err != nil {
+		return User{}, err
+	}
+	return user, nil
+}

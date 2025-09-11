@@ -19,7 +19,7 @@ func(u *Utils) HashPassword(password string) (string, error) {
 	return string(hashedBytes), nil
 }
 
-func CheckPassword(hashedPassword, plainPassword string) bool {
+func(u *Utils) CheckPassword(hashedPassword, plainPassword string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(plainPassword))
 	return err == nil
 }
