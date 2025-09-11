@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package schema;
+
+option go_package = "github.com/sathwik/PatchForge/core/grpc;schema";
+
+import "google/protobuf/empty.proto";
+
+message Request {
+  int32 pr_number = 1;
+  string repo_url = 2;
+  string branch = 3;
+  string commit_hash = 4;
+  string author = 5;
+  string title = 6;
+  string description = 7;
+  string access_token = 8;
+  string email = 9;
+}
+
+service PullRequestService {
+  rpc ProcessPullRequest(Request) returns (google.protobuf.Empty);
+}
