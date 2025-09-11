@@ -30,11 +30,15 @@ func (s *Server) userRegistration(c *gin.Context) {
 		return
 	}
 
-
-	_, err = s.db.CreateUser(req.Username, req.Email, req.Password)
+	hashedPassword, err := s.utils.HashPassword(req.Password)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		return
+	}
+	u, err := s.db.CreateUser(req.Username, req.Email,hashedPassword)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "User registered successfully", "user": u})
 }
