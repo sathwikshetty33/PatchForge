@@ -6,9 +6,10 @@ import "golang.org/x/crypto/bcrypt"
 
 type Utils struct{
 	HashKey string
+	GithubSecret string
 }
-func NewUtils(hashKey string) *Utils{
-	return &Utils{HashKey: hashKey}
+func NewUtils(hashKey string,GithubSecret string) *Utils{
+	return &Utils{HashKey: hashKey, GithubSecret: GithubSecret}
 }
 // HashPassword hashes a plain-text password using bcrypt.
 func(u *Utils) HashPassword(password string) (string, error) {
