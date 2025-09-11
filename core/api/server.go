@@ -38,6 +38,7 @@ func NewServer() *Server {
 	authRoutes := router.Group("/").Use(authMiddleware(*server.jwt))
 	authRoutes.PUT("/update-profile", server.updateProfile)
 	authRoutes.GET("/get-profile", server.getUserProfile)
+	authRoutes.PUT("/update-user", server.updateUser)
 	server.Router = router
 	
 	return &server

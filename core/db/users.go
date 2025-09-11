@@ -50,3 +50,10 @@ func (db *DB) GetUserById(id uint) (User, error) {
 	}
 	return user, nil
 }
+
+func (db *DB) UpdateUser(user *User) error {
+	if err := db.Save(user).Error; err != nil {
+		return err
+	}
+	return nil
+}
