@@ -1,15 +1,18 @@
 package api
 
 import (
-    "crypto/hmac"
-    "crypto/sha256"
-    "encoding/hex"
-    "encoding/json"
-    "fmt"
-    "io"
-    "net/http"
-
-    "github.com/gin-gonic/gin"
+	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"time"
+    pb "github.com/sathwikshetty33/PatchForge/grpc_schema"
+	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
 )
 
 type PushPayload struct {
@@ -88,8 +91,6 @@ func (s *Server) webhook(c *gin.Context) {
         fmt.Printf("📦 Push detected: branch=%s repo=%s pusher=%s\n",
             payload.Ref, payload.Repository.FullName, payload.Pusher.Name)
 
-        // You can now trigger your analysis here (CI/CD, build jobs, etc.)
-
     case "pull_request":
         var payload PullRequestPayload
         if err := json.Unmarshal(body, &payload); err != nil {
@@ -97,7 +98,6 @@ func (s *Server) webhook(c *gin.Context) {
             c.JSON(http.StatusBadRequest, gin.H{"error": "invalid json"})
             return
         }
-
 
         if payload.Action == "closed" && payload.PullRequest.Merged {
             fmt.Printf("✅ Merged PR detected: #%d (%s) by %s in repo %s\n",
@@ -113,6 +113,43 @@ func (s *Server) webhook(c *gin.Context) {
                 payload.PullRequest.Base.Ref,
             )
 
+            // --- gRPC client call to Python service ---
+            conn, err := grpc.NewClient("localhost:50051", grpc.WithInsecure())
+            if err != nil {
+                fmt.Println("❌ Failed to connect to gRPC server:", err)
+                c.JSON(http.StatusInternalServerError, gin.H{"error": "grpc connection failed"})
+                return
+            }
+            defer conn.Close()
+
+            client := pb.NewPullRequestServiceClient(conn)
+
+            ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+            defer cancel()
+            token,email, err :=  s.db.GetProfileByGithubUrl(payload.Repository.FullName)
+            if err != nil {
+                fmt.Println("❌ Failed to get profile from DB:", err)
+                c.JSON(http.StatusInternalServerError, gin.H{"error": "profile lookup failed"})
+                return
+            }
+            req := &pb.Request{
+                PrNumber:    int32(payload.Number),
+                RepoUrl:     payload.Repository.FullName,
+                Branch:      payload.PullRequest.Base.Ref,
+                CommitHash:  payload.PullRequest.Head.SHA,
+                Author:      payload.PullRequest.User.Login,
+                Title:       payload.PullRequest.Title,
+                Description: "Merged PR from webhook",
+                AccessToken: token, // uses token from Server struct
+                Email:      email,
+            }
+
+            _, err = client.ProcessPullRequest(ctx, req)
+            if err != nil {
+                fmt.Println("❌ gRPC call failed:", err)
+            } else {
+                fmt.Println("📨 PR sent to gRPC service successfully")
+            }
         }
 
     default:

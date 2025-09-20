@@ -1,6 +1,10 @@
 package db
 
-import "time"
+import (
+	"fmt"
+	"strings"
+	"time"
+)
 
 
 func (db *DB) GetProfileByUserId(id uint) (Profile, error) {
@@ -17,4 +21,25 @@ func (db *DB) UpdateProfile(profile *Profile) error {
 		return err
 	}
 	return nil
+}
+
+func (db *DB) GetProfileByGithubUrl(request string) (string,string, error) {
+	var prof Profile
+
+	// Extract username before the first "/"
+	parts := strings.SplitN(request, "/", 2)
+	if len(parts) == 0 {
+		return "","", fmt.Errorf("invalid request format: %s", request)
+	}
+	githubUsername := parts[0]
+
+	// Query the DB
+	if err := db.Where("github_url LIKE ?", "%"+githubUsername+"%").First(&prof).Error; err != nil {
+		return "","", err
+	}
+	user,err := db.GetUserById(prof.UserID)
+	if (err != nil) {
+		return "","", err
+	}
+	return prof.AccessToken,user.Email, nil
 }
