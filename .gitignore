@@ -11,3 +11,5 @@ insights/.venv
 core/go.sum
 insights/.env
 insights/utils/.env
+frontend/node_modules
+frontend/.env
