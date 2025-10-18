@@ -54,6 +54,13 @@ func (db *DB) GetUserById(id uint) (User, error) {
 	}
 	return user, nil
 }
+func (db *DB) GetUserByEmail(email string) (User, error) {
+	var user User
+	if err := db.Where("email = ?", email).First(&user).Error; err != nil {
+		return User{}, err
+	}
+	return user, nil
+}
 
 func (db *DB) UpdateUser(user *User) error {
 	if err := db.Save(user).Error; err != nil {

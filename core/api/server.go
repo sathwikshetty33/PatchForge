@@ -36,6 +36,7 @@ func NewServer() *Server {
 	router.POST("/register", server.userRegistration)
 	router.POST("/login", server.userLogin)
 	router.POST("/webhook", server.webhook)
+	router.POST("/auth/google", server.googleAuth)
 	authRoutes := router.Group("/").Use(authMiddleware(*server.jwt))
 	authRoutes.PUT("/profile", server.updateProfile)
 	authRoutes.GET("/profile", server.getUserProfile)
