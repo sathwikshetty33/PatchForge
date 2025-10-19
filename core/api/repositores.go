@@ -72,7 +72,7 @@ type updateRepositoryRequest struct {
 	RepositoryUrl string `json:"repository_url"`
 }
 
-func (s *Server) updateRepository(c *gin.Context) {
+func (s *Server) deleteRepository(c *gin.Context) {
 	var req updateRepositoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})

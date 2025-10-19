@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
-import { User, Mail, Github, Key, Loader } from 'lucide-react';
+import { User, Mail, Github, Key, Loader, Edit2, Save, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
@@ -8,6 +8,16 @@ const ProfilePage = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editedProfile, setEditedProfile] = useState({
+    username: '',
+    email: '',
+    github_url: '',
+    access_token: ''
+  });
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     fetchProfile();
@@ -17,11 +27,62 @@ const ProfilePage = () => {
     try {
       const response = await api.get('/profile');
       setProfile(response.data);
+      setEditedProfile({
+        username: response.data.username || '',
+        email: response.data.email || '',
+        github_url: response.data.github_url || '',
+        access_token: response.data.access_token || ''
+      });
     } catch (error) {
       console.error('Failed to fetch profile:', error);
+      setError('Failed to load profile');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    setError('');
+    setSuccessMessage('');
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditedProfile({
+      username: profile?.username || '',
+      email: profile?.email || '',
+      github_url: profile?.github_url || '',
+      access_token: profile?.access_token || ''
+    });
+    setError('');
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    setError('');
+    setSuccessMessage('');
+
+    try {
+      const response = await api.put('/profile', editedProfile);
+      setProfile({ ...profile, ...editedProfile });
+      setSuccessMessage('Profile updated successfully!');
+      setIsEditing(false);
+      
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      setError(error.response?.data?.error || 'Failed to update profile');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleInputChange = (field, value) => {
+    setEditedProfile(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   if (loading) {
@@ -40,7 +101,53 @@ const ProfilePage = () => {
       <Navbar />
       <div className="pt-24 pb-20 px-4">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold text-white mb-8">Profile</h1>
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-4xl font-bold text-white">Profile</h1>
+            {!isEditing ? (
+              <button
+                onClick={handleEdit}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-300 flex items-center space-x-2"
+              >
+                <Edit2 className="w-4 h-4" />
+                <span>Edit Profile</span>
+              </button>
+            ) : (
+              <div className="flex space-x-2">
+                <button
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-800 text-white rounded-lg transition-all duration-300 flex items-center space-x-2"
+                >
+                  {isSaving ? (
+                    <Loader className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4" />
+                  )}
+                  <span>{isSaving ? 'Saving...' : 'Save'}</span>
+                </button>
+                <button
+                  onClick={handleCancel}
+                  disabled={isSaving}
+                  className="px-4 py-2 bg-slate-600 hover:bg-slate-700 disabled:bg-slate-800 text-white rounded-lg transition-all duration-300 flex items-center space-x-2"
+                >
+                  <X className="w-4 h-4" />
+                  <span>Cancel</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-200">
+              {error}
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="mb-6 p-4 bg-green-500/20 border border-green-500 rounded-lg text-green-200">
+              {successMessage}
+            </div>
+          )}
           
           <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-8 border border-slate-700 mb-6">
             <div className="flex items-center space-x-4 mb-8">
@@ -57,55 +164,73 @@ const ProfilePage = () => {
               <ProfileField
                 icon={<User className="w-5 h-5 text-purple-400" />}
                 label="Username"
-                value={profile?.username || 'Not set'}
+                value={isEditing ? editedProfile.username : (profile?.username || 'Not set')}
+                isEditing={isEditing}
+                onChange={(value) => handleInputChange('username', value)}
               />
               
               <ProfileField
                 icon={<Mail className="w-5 h-5 text-purple-400" />}
                 label="Email"
-                value={profile?.email || 'Not set'}
+                value={isEditing ? editedProfile.email : (profile?.email || 'Not set')}
+                isEditing={isEditing}
+                onChange={(value) => handleInputChange('email', value)}
+                type="email"
               />
               
               <ProfileField
                 icon={<Github className="w-5 h-5 text-purple-400" />}
                 label="GitHub URL"
-                value={profile?.github_url || 'Not connected'}
-                isLink={!!profile?.github_url}
+                value={isEditing ? editedProfile.github_url : (profile?.github_url || 'Not connected')}
+                isEditing={isEditing}
+                onChange={(value) => handleInputChange('github_url', value)}
+                isLink={!isEditing && !!profile?.github_url}
               />
               
               <ProfileField
                 icon={<Key className="w-5 h-5 text-purple-400" />}
                 label="Access Token"
-                value={profile?.access_token ? '••••••••••••••••' : 'Not configured'}
-                sensitive
+                value={isEditing ? editedProfile.access_token : (profile?.access_token ? '••••••••••••••••' : 'Not configured')}
+                isEditing={isEditing}
+                onChange={(value) => handleInputChange('access_token', value)}
+                sensitive={!isEditing}
+                type="password"
+                placeholder={isEditing ? "Enter new token to update" : ""}
               />
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-8 border border-slate-700">
-            <h3 className="text-xl font-bold text-white mb-4">Account Actions</h3>
-            <div className="space-y-3">
-              <button className="w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-300 flex items-center justify-center space-x-2">
-                <Github className="w-5 h-5" />
-                <span>Connect GitHub Account</span>
-              </button>
-              <button className="w-full px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-all duration-300">
-                Update Profile
-              </button>
+          {!isEditing && (
+            <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-8 border border-slate-700">
+              <h3 className="text-xl font-bold text-white mb-4">Account Actions</h3>
+              <div className="space-y-3">
+                <button className="w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-300 flex items-center justify-center space-x-2">
+                  <Github className="w-5 h-5" />
+                  <span>Connect GitHub Account</span>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-const ProfileField = ({ icon, label, value, isLink, sensitive }) => (
+const ProfileField = ({ icon, label, value, isLink, sensitive, isEditing, onChange, type = 'text', placeholder }) => (
   <div className="flex items-start space-x-4 p-4 bg-slate-700/30 rounded-lg">
     <div className="mt-1">{icon}</div>
     <div className="flex-1">
       <p className="text-gray-400 text-sm mb-1">{label}</p>
-      {isLink ? (
+      {isEditing ? (
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-colors"
+        />
+      ) : isLink ? (
         <a href={value} target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 transition-colors">
           {value}
         </a>
