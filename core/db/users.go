@@ -28,8 +28,12 @@ func (db *DB) CreateUser(username string, email string, password string,) (User,
 	user.UpdatedAt = time.Now()
 
 	db.Create(&user)
+	createdUser, err := db.GetUserByUsername(username)
+	if err != nil {
+		return User{}, err
+	}
 	Profile := Profile{
-		UserID: user.ID,
+		UserID: createdUser.ID,
 		User: user,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),

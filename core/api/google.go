@@ -1,12 +1,12 @@
 package api
 
 import (
-	"database/sql"
 	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/api/idtoken"
+	"gorm.io/gorm"
 )
 
 type googleAuthRequest struct {
@@ -32,7 +32,8 @@ func (s *Server) googleAuth(c *gin.Context) {
 	// Check if user already exists in DB
 	user, err := s.db.GetUserByEmail(email)
 	if err != nil {
-		if err != sql.ErrNoRows {
+		// Check for GORM's ErrRecordNotFound instead of sql.ErrNoRows
+		if err != gorm.ErrRecordNotFound {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 			return
 		}
