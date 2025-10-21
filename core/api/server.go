@@ -59,9 +59,9 @@ func NewServer() *Server {
 	
 	// Public routes
 	router.POST("/register", server.userRegistration)
-	router.POST("/auth/login", server.userLogin)
+	router.POST("/api/login", server.userLogin)
 	router.POST("/webhook", server.webhook)
-	router.POST("/auth/google", server.googleAuth)
+	router.POST("/api/auth/github", server.githubAuth)
 	
 	// Protected routes
 	authRoutes := router.Group("/").Use(authMiddleware(*server.jwt))
@@ -70,7 +70,7 @@ func NewServer() *Server {
 	authRoutes.PUT("/user", server.updateUser)
 	authRoutes.POST("/repositories", server.addRepository)
 	authRoutes.GET("/repositories", server.getRepsitories)
-	authRoutes.PUT("/repositories", server.updateRepository)
+	authRoutes.PUT("/repositories", server.deleteRepository)
 	
 	server.Router = router
 
