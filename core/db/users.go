@@ -23,7 +23,9 @@ func (db *DB) CreateUser(username string, email string, password string,) (User,
 	var user User
 	user.Username = username
 	user.Email = email
+	if password != "" {
 	user.Password = password
+	}
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 
