@@ -171,7 +171,7 @@ func (s *Server) addRepository(c *gin.Context) {
 	repoFullName = strings.TrimSuffix(repoFullName, ".git")
 
 	// Create webhook URL - adjust this to your actual webhook endpoint
-	webhookURL := fmt.Sprintf("%s/webhook", "https://6dca8cb8cc76.ngrok-free.app") 
+	webhookURL := fmt.Sprintf("%s/webhook", " https://1179d0a0c1e4.ngrok-free.app") 
 
 	// Create GitHub webhook
 	webhookID, err := s.createGitHubWebhook(
@@ -316,7 +316,7 @@ func (s *Server) deleteWebhookByURL(accessToken, repoFullName string) error {
 		return fmt.Errorf("failed to decode webhooks: %w", err)
 	}
 
-	webhookURL := fmt.Sprintf("%s/webhook", "https://6dca8cb8cc76.ngrok-free.app")
+	webhookURL := fmt.Sprintf("%s/webhook", " https://1179d0a0c1e4.ngrok-free.app")
 	
 	// Find and delete the webhook with our URL
 	for _, webhook := range webhooks {

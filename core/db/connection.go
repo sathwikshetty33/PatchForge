@@ -16,7 +16,7 @@ func NewConnetion(url string) *DB {
 		log.Fatal("Failed to connect to database: ", err)
 	}
 	// db.Exec("DEALLOCATE ALL")
-	// err = db.AutoMigrate(&User{}, &Profile{},&Repository{})
+	// err = db.AutoMigrate(&User{}, &Profile{},&Repository{},&ReleaseNotes{})
 	// if err != nil {
 	// 	log.Fatal("Failed to run migrations:", err)
 	// }
