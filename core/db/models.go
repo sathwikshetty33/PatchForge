@@ -31,3 +31,12 @@ type Repository struct {
 	UpdatedAt time.Time
 	RepositoryUrl string `gorm:"not null"`
 }
+
+type ReleaseNotes struct {
+	ID          uint      `gorm:"primaryKey"`
+	RepositoryID uint      `gorm:"index;not null"` // Foreign key
+	Repository   Repository `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"` // Relation
+	Version     string    `gorm:"not null"`
+	Notes       string    `gorm:"type:text;not null"`
+	CreatedAt   time.Time
+}
