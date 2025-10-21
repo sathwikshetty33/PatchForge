@@ -8,6 +8,7 @@ import RepositoriesPage from './pages/RepositoriesPage';
 import AboutPage from './pages/AboutPage';
 import SettingsPage from './pages/SettingsPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import GitHubCallback from './pages/GithubCallback';
 import './index.css'
 function App() {
   const { user } = useAuth();
@@ -16,7 +17,7 @@ function App() {
     <Routes>
       <Route path="/" element={user ? <Navigate to="/home" /> : <IntroPage />} />
       <Route path="/auth" element={user ? <Navigate to="/home" /> : <AuthPage />} />
-      
+      <Route path="/auth/github/callback" element={<GitHubCallback />} />
       <Route path="/home" element={
         <ProtectedRoute>
           <HomePage />

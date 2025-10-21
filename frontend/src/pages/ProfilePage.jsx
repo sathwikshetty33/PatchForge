@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
-import { User, Mail, Github, Key, Loader, Edit2, Save, X } from 'lucide-react';
+import { User, Mail, Github, Key, Loader, Edit2, Save, X, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
@@ -10,6 +10,7 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isConnectingGithub, setIsConnectingGithub] = useState(false);
   const [editedProfile, setEditedProfile] = useState({
     username: '',
     email: '',
@@ -18,6 +19,11 @@ const ProfilePage = () => {
   });
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+
+  // GitHub OAuth Configuration
+  const GITHUB_CLIENT_ID =  import.meta.env.VITE_APP_GITHUB_CLIENT_ID || 'YOUR_GITHUB_CLIENT_ID';
+  const GITHUB_REDIRECT_URI =  import.meta.env.VITE_APP_GITHUB_REDIRECT_URI || window.location.origin + '/auth/github/callback';
+  const GITHUB_SCOPES = 'user repo admin:repo_hook';
 
   useEffect(() => {
     fetchProfile();
@@ -85,6 +91,138 @@ const ProfilePage = () => {
     }));
   };
 
+  const handleConnectGithub = async () => {
+    setIsConnectingGithub(true);
+    setError('');
+    setSuccessMessage('');
+
+    try {
+      // Generate a random state for CSRF protection
+      const state = Math.random().toString(36).substring(7);
+      sessionStorage.setItem('github_oauth_state', state);
+
+      // Build GitHub OAuth URL
+      const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(GITHUB_REDIRECT_URI)}&scope=${encodeURIComponent(GITHUB_SCOPES)}&state=${state}`;
+
+      // Open popup window
+      const width = 600;
+      const height = 700;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+      
+      const popup = window.open(
+        githubAuthUrl,
+        'GitHub OAuth',
+        `width=${width},height=${height},left=${left},top=${top}`
+      );
+
+      // Listen for messages from the popup
+      const handleMessage = async (event) => {
+        // Verify origin for security
+        if (event.origin !== window.location.origin) return;
+
+        if (event.data.type === 'github-oauth-success') {
+          const { code, state: returnedState } = event.data;
+          const savedState = sessionStorage.getItem('github_oauth_state');
+
+          // Verify state to prevent CSRF
+          if (returnedState !== savedState) {
+            setError('OAuth state mismatch. Please try again.');
+            setIsConnectingGithub(false);
+            return;
+          }
+
+          try {
+            // Exchange code for access token
+            const tokenResponse = await exchangeCodeForToken(code);
+            
+            if (tokenResponse.access_token) {
+              // Fetch GitHub user info
+              const userInfo = await fetchGithubUser(tokenResponse.access_token);
+              
+              // Update profile with GitHub data
+              const updatedProfile = {
+                ...editedProfile,
+                github_url: userInfo.html_url,
+                access_token: tokenResponse.access_token
+              };
+              
+              setEditedProfile(updatedProfile);
+              
+              // Save to backend
+              const response = await api.put('/profile', updatedProfile);
+              setProfile({ ...profile, ...updatedProfile });
+              
+              setSuccessMessage('GitHub account connected successfully!');
+              setTimeout(() => setSuccessMessage(''), 3000);
+            }
+          } catch (error) {
+            console.error('Failed to complete GitHub OAuth:', error);
+            setError('Failed to connect GitHub account. Please try again.');
+          } finally {
+            setIsConnectingGithub(false);
+            sessionStorage.removeItem('github_oauth_state');
+          }
+
+          window.removeEventListener('message', handleMessage);
+        } else if (event.data.type === 'github-oauth-error') {
+          setError(event.data.error || 'Failed to connect GitHub account');
+          setIsConnectingGithub(false);
+          window.removeEventListener('message', handleMessage);
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
+
+      // Handle popup closed without completing OAuth
+      const checkPopupClosed = setInterval(() => {
+        if (popup && popup.closed) {
+          clearInterval(checkPopupClosed);
+          setIsConnectingGithub(false);
+          window.removeEventListener('message', handleMessage);
+        }
+      }, 1000);
+
+    } catch (error) {
+      console.error('Failed to initiate GitHub OAuth:', error);
+      setError('Failed to initiate GitHub connection');
+      setIsConnectingGithub(false);
+    }
+  };
+
+  const exchangeCodeForToken = async (code) => {
+    // This needs to be done through your backend to keep client_secret secure
+    // You'll need to create an endpoint like POST /auth/github/token
+    const response = await fetch('/auth/github/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ code }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to exchange code for token');
+    }
+
+    return await response.json();
+  };
+
+  const fetchGithubUser = async (accessToken) => {
+    const response = await fetch('https://api.github.com/user', {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Accept': 'application/vnd.github.v3+json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch GitHub user info');
+    }
+
+    return await response.json();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -144,8 +282,9 @@ const ProfilePage = () => {
           )}
 
           {successMessage && (
-            <div className="mb-6 p-4 bg-green-500/20 border border-green-500 rounded-lg text-green-200">
-              {successMessage}
+            <div className="mb-6 p-4 bg-green-500/20 border border-green-500 rounded-lg text-green-200 flex items-center space-x-2">
+              <CheckCircle className="w-5 h-5" />
+              <span>{successMessage}</span>
             </div>
           )}
           
@@ -200,17 +339,6 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          {!isEditing && (
-            <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-8 border border-slate-700">
-              <h3 className="text-xl font-bold text-white mb-4">Account Actions</h3>
-              <div className="space-y-3">
-                <button className="w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-300 flex items-center justify-center space-x-2">
-                  <Github className="w-5 h-5" />
-                  <span>Connect GitHub Account</span>
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
