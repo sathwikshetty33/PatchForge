@@ -1,48 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Zap } from 'lucide-react';
+import { Zap, Github } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ name: '', username: '', password: '' });
-  const { login, signup, googleAuth } = useAuth();
-  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const { login, signup } = useAuth();
+  const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID;
+  const REDIRECT_URI = import.meta.env.VITE_GITHUB_REDIRECT_URI || `${window.location.origin}/auth/github/callback`;
 
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
-
-    script.onload = () => {
-      if (window.google) {
-        window.google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          callback: handleGoogleSuccess
-        });
-        window.google.accounts.id.renderButton(
-          document.getElementById('googleSignInButton'),
-          { theme: 'filled_blue', size: 'large', width: 350 }
-        );
-      }
-    };
-
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
-  }, []);
-
-  const handleGoogleSuccess = async (response) => {
-    try {
-      await googleAuth(response.credential);
-    } catch (error) {
-      console.error('Google auth failed:', error);
-      alert('Google authentication failed. Please try again.');
-    }
+  const handleGitHubLogin = () => {
+    const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=repo,user:email,admin:repo_hook`;
+    window.location.href = githubAuthUrl;
   };
 
   const handleSubmit = async () => {
@@ -80,7 +50,13 @@ const AuthPage = () => {
           </p>
         </div>
 
-        <div id="googleSignInButton" className="flex justify-center mb-6"></div>
+        <button
+          onClick={handleGitHubLogin}
+          className="w-full bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 mb-6"
+        >
+          <Github className="w-5 h-5" />
+          Continue with GitHub
+        </button>
 
         <div className="relative mb-6">
           <div className="absolute inset-0 flex items-center">
@@ -106,13 +82,13 @@ const AuthPage = () => {
           )}
 
           <div>
-            <div className="block text-sm font-medium text-gray-300 mb-2">username</div>
+            <div className="block text-sm font-medium text-gray-300 mb-2">Username</div>
             <input
-              type="username"
+              type="text"
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-              placeholder="you@example.com"
+              placeholder="johndoe"
             />
           </div>
 
