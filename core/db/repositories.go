@@ -29,9 +29,9 @@ func (db *DB) GetRepositoryById(id uint) (Repository, error) {
 	}
 	return repo, nil
 }
-func (db *DB) UpdateRepository(repo *Repository) error {
+func (db *DB) DeleteRepository(repo *Repository) error {
 	repo.UpdatedAt = time.Now()
-	if err := db.Save(repo).Error; err != nil {
+	if err := db.Delete(repo).Error; err != nil {
 		return err
 	}
 	return nil
