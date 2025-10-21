@@ -43,8 +43,9 @@ func NewServer() *Server {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	utils := utils.NewUtils(os.Getenv("HASH_KEY"), os.Getenv("GITHUB_SECRET"))
+	utils := utils.NewUtils(os.Getenv("HASH_KEY"), os.Getenv("GITHUB_SECRET"),os.Getenv("WEBHOOK_URL"))
 	secretKey := os.Getenv("SECRET_KEY")
+	
 	jwt := tokens.NewJWT(secretKey)
 	db := db.NewConnetion(os.Getenv("DATABASE_URL"))
 	server := Server{
