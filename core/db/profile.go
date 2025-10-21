@@ -23,23 +23,29 @@ func (db *DB) UpdateProfile(profile *Profile) error {
 	return nil
 }
 
-func (db *DB) GetProfileByGithubUrl(request string) (string,string, error) {
+func (db *DB) GetProfileByGithubUrl(repoFullName string) (string, string, error) {
 	var prof Profile
 
-	// Extract username before the first "/"
-	parts := strings.SplitN(request, "/", 2)
+	// Extract username from repo full name (e.g., "sathwikshetty33/PatchForge" -> "sathwikshetty33")
+	parts := strings.SplitN(repoFullName, "/", 2)
 	if len(parts) == 0 {
-		return "","", fmt.Errorf("invalid request format: %s", request)
+		return "", "", fmt.Errorf("invalid repository format: %s", repoFullName)
 	}
 	githubUsername := parts[0]
 
-	// Query the DB
-	if err := db.Where("github_url LIKE ?", "%"+githubUsername+"%").First(&prof).Error; err != nil {
-		return "","", err
+	// Query the DB - github_url field actually stores just the username
+	if err := db.Where("github_url = ?", 
+		githubUsername, 
+		"%"+githubUsername+"%").First(&prof).Error; err != nil {
+		return "", "", fmt.Errorf("profile not found for github user %s: %w", githubUsername, err)
 	}
-	user,err := db.GetUserById(prof.UserID)
-	if (err != nil) {
-		return "","", err
+
+	// Get user email
+	user, err := db.GetUserById(prof.UserID)
+	if err != nil {
+		return "", "", fmt.Errorf("user not found for profile: %w", err)
 	}
-	return prof.AccessToken,user.Email, nil
+
+	// Return access token and email
+	return prof.AccessToken, user.Email, nil
 }
