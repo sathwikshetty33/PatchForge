@@ -42,12 +42,12 @@ function App() {
         </ProtectedRoute>
       } />
       
-      <Route path="/settings" element={
+      {/* <Route path="/settings" element={
         <ProtectedRoute>
           <SettingsPage />
         </ProtectedRoute>
       } />
-      
+       */}
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );

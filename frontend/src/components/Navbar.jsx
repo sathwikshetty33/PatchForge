@@ -13,7 +13,7 @@ const Navbar = () => {
     { path: '/profile', label: 'Profile', icon: User },
     { path: '/repositories', label: 'Repositories', icon: Github },
     { path: '/about', label: 'About', icon: Info },
-    { path: '/settings', label: 'Settings', icon: Settings },
+    // { path: '/settings', label: 'Settings', icon: Settings },
   ];
 
   const isActive = (path) => location.pathname === path;
