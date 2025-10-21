@@ -34,11 +34,10 @@ func (db *DB) GetProfileByGithubUrl(repoFullName string) (string, string, error)
 	githubUsername := parts[0]
 
 	// Query the DB - github_url field actually stores just the username
-	if err := db.Where("github_url = ?", 
-		githubUsername, 
-		"%"+githubUsername+"%").First(&prof).Error; err != nil {
-		return "", "", fmt.Errorf("profile not found for github user %s: %w", githubUsername, err)
-	}
+if err := db.Where("github_url = ?", githubUsername).First(&prof).Error; err != nil {
+	return "", "", fmt.Errorf("profile not found for github user %s: %w", githubUsername, err)
+}
+
 
 	// Get user email
 	user, err := db.GetUserById(prof.UserID)
