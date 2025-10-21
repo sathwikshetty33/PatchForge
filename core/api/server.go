@@ -62,7 +62,6 @@ func NewServer() *Server {
 	router.POST("/api/login", server.userLogin)
 	router.POST("/webhook", server.webhook)
 	router.POST("/api/auth/github", server.githubAuth)
-	
 	// Protected routes
 	authRoutes := router.Group("/").Use(authMiddleware(*server.jwt))
 	authRoutes.PUT("/profile", server.updateProfile)
@@ -71,7 +70,8 @@ func NewServer() *Server {
 	authRoutes.POST("/repositories", server.addRepository)
 	authRoutes.GET("/repositories", server.getRepsitories)
 	authRoutes.PUT("/repositories", server.deleteRepository)
-	
+	authRoutes.GET("/release-notes", server.getReleaseNotesByUserId)
+	authRoutes.GET("/release-notes/:repoID", server.getReleaseNotesByRepoID)
 	server.Router = router
 
 	return &server
