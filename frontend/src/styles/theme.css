@@ -1,0 +1,94 @@
+/* =============================
+   🎨 PatchForge Unified Theme
+   File: src/styles/theme.css
+   Description: Defines global UI consistency
+   ============================= */
+
+/* ---------- COLORS ---------- */
+:root {
+  --primary-color: #1e88e5;
+  --secondary-color: #1565c0;
+  --background-color: #f9f9fb;
+  --surface-color: #ffffff;
+  --text-color: #222222;
+  --text-muted: #666666;
+  --border-color: #e0e0e0;
+  --hover-color: #e3f2fd;
+  --error-color: #e53935;
+  --success-color: #43a047;
+}
+
+/* ---------- TYPOGRAPHY ---------- */
+body {
+  font-family: 'Inter', 'Roboto', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  margin: 0;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4 {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+p {
+  color: var(--text-muted);
+}
+
+/* ---------- BUTTONS ---------- */
+button,
+.btn {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover,
+.btn:hover {
+  background-color: var(--secondary-color);
+  transform: translateY(-2px);
+}
+
+/* ---------- FORMS ---------- */
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 15px;
+  transition: border 0.3s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+/* ---------- MODALS ---------- */
+.modal {
+  background-color: var(--surface-color);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 8px 20px rgba(0,0,0,0.1);
+}
+
+/* ---------- RESPONSIVENESS ---------- */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  button {
+    width: 100%;
+  }
+}
