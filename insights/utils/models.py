@@ -3,8 +3,6 @@ from typing import Optional, List
 from dataclasses import dataclass
 from pydantic import BaseModel, Field
 import os
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import JsonOutputParser
 from dotenv import load_dotenv
 load_dotenv()
 # Configure logging

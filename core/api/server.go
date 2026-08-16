@@ -39,9 +39,9 @@ func CORSMiddleware() gin.HandlerFunc {
 }
 
 func NewServer() *Server {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	// A .env file is optional: in Docker/CI the values come from the environment.
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file loaded, falling back to process environment:", err)
 	}
 	utils := utils.NewUtils(os.Getenv("HASH_KEY"), os.Getenv("GITHUB_SECRET"),os.Getenv("WEBHOOK_URL"))
 	secretKey := os.Getenv("SECRET_KEY")

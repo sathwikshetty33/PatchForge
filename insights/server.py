@@ -179,23 +179,18 @@
 
 from datetime import datetime, timezone
 import grpc
-import sys, os
+import sys
+import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "grpc_files"))
 sys.path.append(os.path.join(os.path.dirname(__file__), "utils"))
 from utils.utils import *
 from utils.agent import *
 from concurrent import futures
-from grpc_files import schema_pb2, schema_pb2_grpc
+from grpc_files import schema_pb2_grpc
 from google.protobuf import empty_pb2
-from groq import Groq
-from typing import Optional
 import logging
 from dotenv import load_dotenv
 import os
-import smtplib
-import requests
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from sqlalchemy.exc import SQLAlchemyError
 
 # Import database models
@@ -373,7 +368,7 @@ class PullRequestService(schema_pb2_grpc.PullRequestServiceServicer):
             if email_sent:
                 logger.info(f"Release notes successfully sent to {request.email}")
                 if db_saved:
-                    logger.info(f"Release notes successfully saved to database")
+                    logger.info("Release notes successfully saved to database")
             else:
                 error_message = "Failed to send release notes email"
                 logger.error(error_message)

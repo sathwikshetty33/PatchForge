@@ -2,7 +2,6 @@ from datetime import datetime
 import requests
 import logging
 import smtplib
-import requests
 from typing import Dict, Union
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -10,7 +9,6 @@ from email.mime.multipart import MIMEMultipart
 from .models import *
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-from typing import Optional
 
 def fetch_pr_diff(repo_url: str, commit_hash: str, access_token: str) -> Dict[str, Union[str, None]]:
     """
@@ -115,10 +113,7 @@ def fetch_pr_diff(repo_url: str, commit_hash: str, access_token: str) -> Dict[st
 #         except Exception as e:
 #             logger.error(f"Error generating release notes with Groq: {str(e)}")
 #            return None
-import smtplib
 import logging
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 import re
 
 logger = logging.getLogger(__name__)

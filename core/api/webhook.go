@@ -9,12 +9,22 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 	pb "github.com/sathwikshetty33/PatchForge/grpc_schema"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 )
+
+// insightsAddr returns the address of the Python insights gRPC server. It is
+// configurable so the service can be reached across containers in Docker.
+func insightsAddr() string {
+	if addr := os.Getenv("INSIGHTS_GRPC_ADDR"); addr != "" {
+		return addr
+	}
+	return "localhost:50051"
+}
 
 type PushPayload struct {
 	Ref     string `json:"ref"`
@@ -123,7 +133,7 @@ func (s *Server) webhook(c *gin.Context) {
 			}
 
 			// Connect to gRPC server
-			conn, err := grpc.NewClient("localhost:50051", grpc.WithInsecure())
+			conn, err := grpc.NewClient(insightsAddr(), grpc.WithInsecure())
 			if err != nil {
 				fmt.Println("❌ Failed to connect to gRPC server:", err)
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "grpc connection failed"})
@@ -185,7 +195,7 @@ func (s *Server) webhook(c *gin.Context) {
 			)
 
 			// --- gRPC client call to Python service ---
-			conn, err := grpc.NewClient("localhost:50051", grpc.WithInsecure())
+			conn, err := grpc.NewClient(insightsAddr(), grpc.WithInsecure())
 			if err != nil {
 				fmt.Println("❌ Failed to connect to gRPC server:", err)
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "grpc connection failed"})
