@@ -8,8 +8,10 @@ wheels/
 core/.env
 # Virtual environments
 insights/.venv
-core/go.sum
 insights/.env
 insights/utils/.env
 frontend/node_modules
 frontend/.env
+
+# docker compose environment (see .env.example)
+.env
